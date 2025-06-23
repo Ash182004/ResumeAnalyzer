@@ -10,10 +10,13 @@
     "lint": "eslint ."
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/vite": "^4.1.10",
     "autoprefixer": "^10.4.21",
     "axios": "^1.10.0",
+    "firebase": "^11.9.1",
+    "html2pdf.js": "^0.10.3",
     "pdf-lib": "^1.17.1",
     "postcss": "^8.5.5",
     "react": "^19.1.0",

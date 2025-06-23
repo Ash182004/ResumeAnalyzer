@@ -20,31 +20,26 @@ export default function ResumeUpload({ userInfo, onAnalysisComplete }) {
     const allowedTypes = ['application/pdf', 'text/plain'];
     const maxSize = 5 * 1024 * 1024; // 5MB
 
-    // Reset previous state
     setError('');
     setProgress(0);
 
-    // Validate file type
     if (!allowedTypes.includes(selectedFile.type)) {
       setError('Only PDF and TXT files are allowed');
       resetFileInput();
       return;
     }
 
-    // Validate file size
     if (selectedFile.size > maxSize) {
       setError('File size must be less than 5MB');
       resetFileInput();
       return;
     }
 
-    // For text files, just set the file
     if (selectedFile.type === 'text/plain') {
       setFile(selectedFile);
       return;
     }
 
-    // For PDF files, validate
     validatePdf(selectedFile)
       .then(() => setFile(selectedFile))
       .catch((err) => {
@@ -64,7 +59,7 @@ export default function ResumeUpload({ userInfo, onAnalysisComplete }) {
   const validatePdf = async (file) => {
     return new Promise((resolve, reject) => {
       const fileReader = new FileReader();
-      
+
       fileReader.onload = async () => {
         try {
           const typedArray = new Uint8Array(fileReader.result);
@@ -74,27 +69,14 @@ export default function ResumeUpload({ userInfo, onAnalysisComplete }) {
           reject(err);
         }
       };
-      
-      fileReader.onerror = () => {
-        reject(new Error('Failed to read file'));
-      };
-      
+
+      fileReader.onerror = () => reject(new Error('Failed to read file'));
       fileReader.readAsArrayBuffer(file);
     });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Submitting with:', {
-    file: file ? {
-      name: file.name,
-      type: file.type,
-      size: file.size
-    } : null,
-    userInfo,
-    hasToken: !!user?.token,
-    token: user?.token ? '***' + user.token.slice(-4) : null
-  });
     if (!file || !userInfo || !user?.token) {
       setError('Please complete all required steps');
       return;
@@ -112,45 +94,30 @@ export default function ResumeUpload({ userInfo, onAnalysisComplete }) {
 
       const config = {
         headers: {
-         
           'Content-Type': 'multipart/form-data',
-          //  'Authorization': `Bearer ${user.token}`
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
           );
           setProgress(percentCompleted);
-        }
+        },
       };
 
       const result = await analyzeResume(formData, config);
-      
+
       if (onAnalysisComplete) {
-        onAnalysisComplete(result.data);
+        onAnalysisComplete(result);
       } else {
-        navigate('/analysis-results', { 
-          state: { 
+        navigate('/analysis-results', {
+          state: {
             analysis: result.data,
-            resumeName: file.name 
-          } 
+            resumeName: file.name,
+          },
         });
       }
-      
     } catch (err) {
       let errorMessage = 'Analysis failed. Please try again.';
-       console.error('Full error details:', {
-    message: err.message,
-    code: err.code,
-    response: err.response ? {
-      status: err.response.status,
-      data: err.response.data,
-      headers: err.response.headers
-    } : null,
-    request: err.request,
-    config: err.config
-  });
-      
       if (err.response) {
         if (err.response.status === 413) {
           errorMessage = 'File too large. Maximum 5MB allowed.';
@@ -160,9 +127,7 @@ export default function ResumeUpload({ userInfo, onAnalysisComplete }) {
       } else if (err.request) {
         errorMessage = 'Network error. Please check your connection.';
       }
-      
       setError(errorMessage);
-      console.error('Analysis error:', err);
     } finally {
       setIsLoading(false);
       setProgress(0);
@@ -170,62 +135,63 @@ export default function ResumeUpload({ userInfo, onAnalysisComplete }) {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-md mx-auto p-6 bg-white dark:bg-[#0A1045] text-gray-800 dark:text-gray-100 rounded-lg shadow-md">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 mb-1">Upload Your Resume</h2>
-        <p className="text-gray-600">Get personalized feedback on your resume</p>
+        <h2 className="text-2xl font-bold mb-1">Upload Your Resume</h2>
+        <p className="text-gray-600 dark:text-gray-300">
+          Get personalized feedback on your resume
+        </p>
       </div>
-      
+
       {error && (
-        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-md">
+        <div
+          role="alert"
+          aria-live="assertive"
+          className="mb-4 p-3 bg-red-50 text-red-700 rounded-md text-sm"
+        >
           {error}
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium text-gray-700">
-            Select Resume File
-          </label>
+          <label className="block text-sm font-medium">Select Resume File</label>
           <div className="flex items-center justify-center w-full">
-            <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100 transition-colors">
+            <label className="flex flex-col items-center justify-center w-full h-36 border-2 border-dashed border-blue-300 dark:border-sky-500 rounded-xl bg-blue-50/20 hover:bg-blue-100/50 dark:hover:bg-sky-900 cursor-pointer transition-colors duration-200 focus-within:ring-2 focus-within:ring-sky-400">
               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                 <svg className="w-8 h-8 mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                 </svg>
-                <p className="mb-2 text-sm text-gray-500">
+                <p className="mb-1 text-sm">
                   <span className="font-semibold">Click to upload</span> or drag and drop
                 </p>
-                <p className="text-xs text-gray-500">
-                  PDF or TXT (MAX. 5MB)
-                </p>
+                <p className="text-xs text-gray-500">PDF or TXT (MAX. 5MB)</p>
               </div>
-              <input 
+              <input
                 ref={fileInputRef}
-                type="file" 
-                accept=".pdf,.txt" 
+                type="file"
+                accept=".pdf,.txt"
                 onChange={handleFileChange}
-                className="hidden" 
+                className="hidden"
                 required
               />
             </label>
           </div>
+
           {file && (
-            <div className="mt-2 flex items-center text-sm text-gray-600">
-              <svg className="flex-shrink-0 mr-1.5 h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"></path>
+            <div className="mt-2 flex items-center text-sm text-gray-600 dark:text-gray-300">
+              <svg className="flex-shrink-0 mr-2 h-5 w-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
               </svg>
-              {file.name} ({Math.round(file.size / 1024)} KB)
+              <span className="truncate">{file.name}</span>
+              <span className="ml-2 text-xs text-gray-400">({Math.round(file.size / 1024)} KB)</span>
             </div>
           )}
         </div>
 
         {progress > 0 && progress < 100 && (
           <div className="w-full bg-gray-200 rounded-full h-2.5">
-            <div 
-              className="bg-blue-600 h-2.5 rounded-full" 
-              style={{ width: `${progress}%` }}
-            ></div>
+            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
           </div>
         )}
 
@@ -239,20 +205,20 @@ export default function ResumeUpload({ userInfo, onAnalysisComplete }) {
           }`}
         >
           {isLoading ? (
-            <>
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <div className="flex items-center gap-2">
+              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              Analyzing...
-            </>
+              <span>Analyzing...</span>
+            </div>
           ) : (
             'Analyze Resume'
           )}
         </button>
       </form>
 
-      <div className="mt-6 text-xs text-gray-500">
+      <div className="mt-6 text-xs text-gray-600 dark:text-gray-400">
         <p>Your resume will be analyzed for:</p>
         <ul className="list-disc pl-5 mt-1 space-y-1">
           <li>Key skills and qualifications</li>

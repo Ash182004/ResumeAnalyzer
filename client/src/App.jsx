@@ -1,24 +1,34 @@
-// client/src/App.jsx
-import { BrowserRouter } from 'react-router-dom'
-import { AuthProvider } from './utils/auth'
-import Navbar from './components/Layout/Navbar'
-import Footer from './components/Layout/Footer'
-import {AppRoutes} from './AppRoutes'
+import { BrowserRouter, useLocation } from 'react-router-dom';
+import { AuthProvider } from './utils/auth';
+import Navbar from './components/Layout/Navbar';
+import Footer from './components/Layout/Footer';
+import { AppRoutes } from './AppRoutes';
+
+function LayoutWrapper() {
+  const location = useLocation();
+  const hideFooterOnRoutes = ['/login', '/register'];
+
+  const shouldHideFooter = hideFooterOnRoutes.includes(location.pathname);
+
+  return (
+    <div className="min-h-screen flex flex-col transition-colors duration-300">
+      <Navbar />
+      <main className="flex-grow">
+        <AppRoutes />
+      </main>
+      {!shouldHideFooter && <Footer />}
+    </div>
+  );
+}
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <div className="min-h-screen flex flex-col bg-white">
-          <Navbar />
-          <main className="flex-grow">
-            <AppRoutes />
-          </main>
-          <Footer />
-        </div>
+        <LayoutWrapper />
       </AuthProvider>
     </BrowserRouter>
-  )
+  );
 }
 
-export default App
+export default App;

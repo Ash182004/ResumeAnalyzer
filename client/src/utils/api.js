@@ -80,17 +80,6 @@ export const loginUser = async (credentials) => {
   }
 };
 
-export const analyzeResume = async (formData, config) => {
-  try {
-    const response = await api.post('/resume/analyze', formData, config);
-    return response.data;
-  } catch (error) {
-    console.error('Resume analysis error:', error.message);
-    throw new Error(
-      error.response?.data?.error || 'Internal server error occurred'
-    );
-  }
-};
 
 export const getProfile = async () => {
   try {
@@ -113,5 +102,16 @@ export const refreshToken = async () => {
     throw error;
   }
 };
+
+export const analyzeResume = async (formData, config) => {
+  try {
+    const response = await api.post('/resume/analyze', formData, config);
+    return response.data; 
+  } catch (error) {
+    console.error('Resume analysis error:', error);
+    throw error;
+  }
+};
+
 
 export default api;
