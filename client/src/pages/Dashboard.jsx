@@ -12,20 +12,20 @@ export default function Dashboard() {
   const [analysis, setAnalysis] = useState(null);
 
   useEffect(() => {
-    console.log('Dashboard mounted, location.state:', location.state);
+  
     // If coming from registration, stay on welcome panel (step 0),
     // otherwise skip welcome panel to step 1.
     if (location.state?.fromRegistration) {
       setStep(0); 
-      console.log('From registration detected, setting step 0 (WelcomePanel)');
+    
     } else {
       setStep(1);
-      console.log('Not from registration, skipping welcome to step 1');
+      
     }
   }, [location]);
 
   // Optional: Add keyboard or component debug info for safety
-  console.log('Dashboard render - step:', step, 'userInfo:', userInfo, 'analysis:', analysis);
+  
 
   const handleUserTypeComplete = (info) => {
     setUserInfo(info);

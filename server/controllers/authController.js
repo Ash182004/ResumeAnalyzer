@@ -5,7 +5,7 @@ const { JWT_SECRET } = require('../config/config');
 
 // Register a new user
 const generateToken = (userId) => {
-  console.log('Using JWT_SECRET:', JWT_SECRET);
+ 
   return jwt.sign(
     { userId },
     JWT_SECRET,
@@ -31,7 +31,7 @@ exports.register = async (req, res) => {
 
     // Generate JWT token
       const token = generateToken(user._id);
-    console.log('Generated token:', token);
+   
 
     res.status(201).json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (error) {
@@ -59,7 +59,7 @@ exports.login = async (req, res) => {
 
     // Generate JWT token
      const token = generateToken(user._id);
-    console.log('Generated token:', token);
+   
 
     res.json({ token, user: { id: user._id, email: user.email, name: user.name } });
   } catch (error) {

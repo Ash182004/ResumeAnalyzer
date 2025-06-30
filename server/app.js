@@ -4,11 +4,17 @@ const cors = require('cors');
 const fileUpload = require('express-fileupload');
 const authRoutes = require('./routes/authRoutes');
 const resumeRoutes = require('./routes/resumeRoutes');
-const { HUGGING_FACE_API_KEY } = require('./config/config.js');
+const path = require("path");
+const history = require('connect-history-api-fallback');
+
+// Apply before static middleware
+
+
 require('dotenv').config();
 
 
 const app = express();
+const _dirname=path.resolve();
 
 // CORS middleware first
 app.use(cors());
@@ -29,5 +35,11 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/resume-an
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/resume', resumeRoutes);
+app.use(history());
+
+app.use(express.static(path.join(_dirname,"/client/dist")));
+// app.get('/*',(_,res)=>{
+//   res.sendFile(path.resolve(_dirname,"client","dist","index.html"));
+// });
 
 module.exports = app;

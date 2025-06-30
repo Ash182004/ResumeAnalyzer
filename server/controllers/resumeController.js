@@ -19,6 +19,21 @@ exports.analyzeResume = async (req, res) => {
     const parsed = await pdfParse(fileBuffer);
     const resumeText = parsed.text.toLowerCase();
 
+    // ✅ Mandatory Resume Keywords Check
+    const mandatoryKeywords = ['project', 'github', 'linkedin'];
+    let keywordCount = 0;
+
+    mandatoryKeywords.forEach(keyword => {
+      if (resumeText.includes(keyword)) keywordCount++;
+    });
+
+    if (keywordCount < 3) {
+      return res.status(400).json({
+        error: 'The uploaded document does not appear to be a valid resume. It lacks required sections like Projects, GitHub, LinkedIn, or Experience.'
+      });
+    }
+
+    // ✅ Continue with your existing logic below...
     const sentimentScore = sentiment.analyze(resumeText).score;
 
     const getMatches = (arr) => arr.filter(item => resumeText.includes(item.toLowerCase()));
@@ -31,7 +46,6 @@ exports.analyzeResume = async (req, res) => {
 
     const experienceLevel = detectExperienceLevel(resumeText);
 
-    // === Dynamic ATS Score Based on Experience ===
     const atsScore = calculateATSScore({
       experienceLevel,
       matchedSections,
@@ -78,6 +92,7 @@ exports.analyzeResume = async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
 
 // === Helpers ===
 

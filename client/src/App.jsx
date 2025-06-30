@@ -6,13 +6,14 @@ import { AppRoutes } from './AppRoutes';
 
 function LayoutWrapper() {
   const location = useLocation();
-  const hideFooterOnRoutes = ['/login', '/register'];
+  const hideOnRoutes = ['/login', '/register'];
 
-  const shouldHideFooter = hideFooterOnRoutes.includes(location.pathname);
+  const shouldHideNavbar = hideOnRoutes.includes(location.pathname);
+  const shouldHideFooter = hideOnRoutes.includes(location.pathname);
 
   return (
     <div className="min-h-screen flex flex-col transition-colors duration-300">
-      <Navbar />
+      {!shouldHideNavbar && <Navbar />}
       <main className="flex-grow">
         <AppRoutes />
       </main>
